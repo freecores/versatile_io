@@ -8,7 +8,7 @@ module versatile_io (
     input [3:0] wbs_sel_i,
     input wbs_we_i, wbs_stb_i, wbs_cyc_i,
     output [31:0] wbs_dat_o,
-    output wbs_ack_o;
+    output wbs_ack_o,
 `ifdef B4
     output wbs_stall_o,
 `endif
@@ -20,17 +20,24 @@ module versatile_io (
     input clk, rst
 );
 
+`ifdef UART0
+parameter uart0_mem_map_hi = `UART0_MEM_MAP_HI;
+parameter uart0_mem_map_lo = `UART0_MEM_MAP_LO;
+parameter [31:0] uart0_base_adr = `UART0_BASE_ADR;
+`endif
 function [7:0] tobyte;
 input [3:0] sel_i;
 input [31:0] dat_i;
 begin
     tobyte = ({8{sel_i[3]}} & dat_i[31:24]) | ({8{sel_i[2]}} & dat_i[23:16]) | ({8{sel_i[1]}} & dat_i[15:8]) | ({8{sel_i[0]}} & dat_i[7:0]);
+end
 endfunction
 
 function [31:0] toword;
 input [7:0] dat_i;
 begin
     toword = {4{dat_i}};
+end
 endfunction
 
 function [31:0] mask;
@@ -39,22 +46,15 @@ input sel;
 begin
     mask = {32{sel}} & dat_i;
 end
-
-function cs;
-input [31:0] adr;
-input [31:0] mem_map;
-input [4:0] mem_map_hi;
-input [4:0] mem_map_lo;
-begin
-    cs = adr[mem_map_hi:mem_map_lo] == mem_map[mem_map_hi:mem_map_lo];
 endfunction
 
 `ifdef UART0
-wire uart0_cs = cs( wbs_adr_i, `UART0_BASE, `UART0_MEM_MAP_HI, `UART0_MEM_MAP_LO);
+wire uart0_cs;
+assign uart0_cs = wbs_adr_i[uart0_mem_map_hi:uart0_mem_map_lo] == uart0_base_adr[uart0_mem_map_hi:uart0_mem_map_lo];
 wire [7:0] uart0_temp;
 wire uart0_ack_o;
 uart_top uart0	(
-    .wb_clk_i(wbs_clk), wb_rst_i(wbs_rst), 	
+    .wb_clk_i(wbs_clk), .wb_rst_i(wbs_rst), 	
     // Wishbone signals
     .wb_adr_i(wbs_adr_i[2:0]), .wb_dat_i(tobyte(wbs_sel_i,wbs_dat_i)), .wb_dat_o(uart0_temp), .wb_we_i(wbs_we_i), .wb_stb_i(wbs_stb_i), .wb_cyc_i(wbs_cyc_i & uart0_cs), .wb_ack_o(uart0_ack_o), .wb_sel_i(4'b0),
     .int_o(uart0_irq), // interrupt request

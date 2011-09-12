@@ -7,7 +7,7 @@ config:
 ip:
 	make -C rtl/verilog ip
 
-all: config ip
+all: export config ip
 
 clean:
 	make -C rtl/verilog clean
