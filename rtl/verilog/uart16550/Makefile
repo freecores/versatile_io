@@ -29,3 +29,4 @@ ip:
 clean:
 	rm $(RTL_FILES)
 	rm $(DEFINE_FILES)
+	rm uart16550_ip.v
