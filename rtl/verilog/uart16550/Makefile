@@ -1,7 +1,7 @@
 SVN_PATH = http://opencores.org/ocsvn/uart16550/uart16550/trunk/rtl/verilog/
 
-DEFINE_FILES = uart_defines.v
-DEFINE_FILES += timescale.v
+#DEFINE_FILES = uart_defines.v
+DEFINE_FILES = timescale.v
 
 RTL_FILES = raminfr.v
 RTL_FILES += uart_debug_if.v
