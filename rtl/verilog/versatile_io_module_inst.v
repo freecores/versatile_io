@@ -2,8 +2,8 @@
 
 versatile_io vio0 (
     .wbs_dat_i(wbs_vio_dat_i),
-    .wbs_adr_i(wbs_vio_adr_i);
-    .wbs_sel_i(wbs_vio_sel_i);
+    .wbs_adr_i(wbs_vio_adr_i),
+    .wbs_sel_i(wbs_vio_sel_i),
     .wbs_we_i(wbs_vio_we_i),
     .wbs_stb_i(wbs_vio_stb_i),
     .wbs_cyc_i(wbs_vio_cyc_i),
@@ -23,4 +23,4 @@ versatile_io vio0 (
     .uart1_irq(vio_uart1_irq),
 `endif
     .wbs_clk(wb_clk), .wbs_rst(wb_rst),
-    .clk(), .rst());
+    .clk(clk33), .rst(rst33));
