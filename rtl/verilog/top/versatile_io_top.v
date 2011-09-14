@@ -1,7 +1,3 @@
-`include "include/versatile_io_defines.v"
-`ifdef UART0
-`include "uart16550_ip.v"
-`endif
 module versatile_io (
     input [31:0] wbs_dat_i,
     input [31:0] wbs_adr_i,

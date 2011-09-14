@@ -17,5 +17,10 @@ versatile_io vio0 (
     .uart0_tx_pad_i(uart0_tx_pad_i),
     .uart0_irq(vio_uart0_irq),
 `endif
+`ifdef UART1
+    .uart1_rx_pad_i(uart1_rx_pad_i),
+    .uart1_tx_pad_i(uart1_tx_pad_i),
+    .uart1_irq(vio_uart1_irq),
+`endif
     .wbs_clk(wb_clk), .wbs_rst(wb_rst),
     .clk(), .rst());
