@@ -1450,6 +1450,8 @@ begin
 end
 endfunction
 
+wire [31:0] uart0_dat_o;
+
 `ifdef UART0
 wire uart0_cs;
 assign uart0_cs = wbs_adr_i[uart0_mem_map_hi:uart0_mem_map_lo] == uart0_base_adr[uart0_mem_map_hi:uart0_mem_map_lo];
@@ -1462,7 +1464,7 @@ uart_top uart0	(
     .int_o(uart0_irq), // interrupt request
     // UART	signals
     // serial input/output
-    .stx_pad_o(uart0_tx_pad_i), .srx_pad_i(uart0_rx_pad_i),
+    .stx_pad_o(uart0_tx_pad_o), .srx_pad_i(uart0_rx_pad_i),
     // modem signals
     .rts_pad_o(), .cts_pad_i(1'b0), .dtr_pad_o(), .dsr_pad_i(1'b0), .ri_pad_i(1'b0), .dcd_pad_i(1'b0) );
 assign uart0_dat_o = mask( toword(uart0_temp), uart0_ack_o);
