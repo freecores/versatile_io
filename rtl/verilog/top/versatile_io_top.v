@@ -16,6 +16,7 @@ module versatile_io (
     input clk, rst
 );
 
+wire [31:0] uart0_dat_o;
 `ifdef UART0
 parameter uart0_mem_map_hi = `UART0_MEM_MAP_HI;
 parameter uart0_mem_map_lo = `UART0_MEM_MAP_LO;
