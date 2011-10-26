@@ -49,6 +49,7 @@ wire uart0_cs;
 assign uart0_cs = wbs_adr_i[uart0_mem_map_hi:uart0_mem_map_lo] == uart0_base_adr[uart0_mem_map_hi:uart0_mem_map_lo];
 wire [7:0] uart0_temp;
 wire uart0_ack_o;
+/*
 uart_top uart0	(
     .wb_clk_i(wbs_clk), .wb_rst_i(wbs_rst), 	
     // Wishbone signals
@@ -56,9 +57,25 @@ uart_top uart0	(
     .int_o(uart0_irq), // interrupt request
     // UART	signals
     // serial input/output
-    .stx_pad_o(uart0_tx_pad_i), .srx_pad_i(uart0_rx_pad_i),
+    .stx_pad_o(uart0_tx_pad_o), .srx_pad_i(uart0_rx_pad_i),
     // modem signals
     .rts_pad_o(), .cts_pad_i(1'b0), .dtr_pad_o(), .dsr_pad_i(1'b0), .ri_pad_i(1'b0), .dcd_pad_i(1'b0) );
+*/
+uart16750_wb uart0(
+    // UART signals
+    .rx(uart0_rx_pad_i),
+    .tx(uart0_tx_pad_o),
+    .int(uart0_irq),
+    // wishbone slave
+    .wbs_dat_i(tobyte(wbs_sel_i,wbs_dat_i)),
+    .wbs_adr_i(wbs_adr_i[2:0]),
+    .wbs_we_i(wbs_we_i),
+    .wbs_cyc_i(wbs_cyc_i & uart0_cs),
+    .wbs_stb_i(wbs_stb_i),
+    .wbs_dat_o(uart0_temp),
+    .wbs_ack_o(uart0_ack_o),
+    .wb_clk_i(wbs_clk),
+    .wb_rst_i(wbs_rst) );
 assign uart0_dat_o = mask( toword(uart0_temp), uart0_ack_o);
 `else
 assign uart0_dat_o = 32'h0;
