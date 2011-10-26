@@ -22,7 +22,7 @@ wire  [addr_width-1:0] dpra;
   assign dpo = ram[dpra];   
 endmodule 
 `timescale 1ns/10ps
-module uart_debug_if (
+module uart_debug_if ( 
 wb_dat32_o, 
 wb_adr_i, ier, iir, fcr, mcr, lcr, msr, 
 lsr, rf_count, tf_count, tstate, rstate
@@ -31,7 +31,7 @@ input [3-1:0] 		wb_adr_i;
 output [31:0] 							wb_dat32_o;
 input [3:0] 							ier;
 input [3:0] 							iir;
-input [1:0] 							fcr;  
+input [1:0] 							fcr;   
 input [4:0] 							mcr;
 input [7:0] 							lcr;
 input [7:0] 							msr;
@@ -42,14 +42,14 @@ input [2:0] 							tstate;
 input [3:0] 							rstate;
 wire [3-1:0] 		wb_adr_i;
 reg [31:0] 								wb_dat32_o;
-always @(fcr or ier or iir or lcr or lsr or mcr or msr
+always @( fcr or ier or iir or lcr or lsr or mcr or msr
 			or rf_count or rstate or tf_count or tstate or wb_adr_i)
 	case (wb_adr_i)
 		5'b01000: wb_dat32_o = {msr,lcr,iir,ier,lsr};
 		5'b01100: wb_dat32_o = {8'b0, fcr,mcr, rf_count, rstate, tf_count, tstate};
 		default: wb_dat32_o = 0;
-	endcase 
-endmodule 
+	endcase  
+endmodule  
 `timescale 1ns/10ps
 module uart_receiver (clk, wb_rst_i, lcr, rf_pop, srx_pad_i, enable, 
 	counter_t, rf_count, rf_data_out, rf_error_bit, rf_overrun, rx_reset, lsr_mask, rstate, rf_push_pulse);
@@ -71,13 +71,13 @@ output 				rf_push_pulse;
 reg	[3:0]	rstate;
 reg	[3:0]	rcounter16;
 reg	[2:0]	rbit_counter;
-reg	[7:0]	rshift;			
-reg		rparity;		
+reg	[7:0]	rshift;			 
+reg		rparity;		 
 reg		rparity_error;
-reg		rframing_error;		
+reg		rframing_error;		 
 reg		rbit_in;
 reg		rparity_xor;
-reg	[7:0]	counter_b;	
+reg	[7:0]	counter_b;	 
 reg   rf_push_q;
 reg	[11-1:0]	rf_data_in;
 wire	[11-1:0]	rf_data_out;
@@ -86,7 +86,7 @@ reg				rf_push;
 wire				rf_pop;
 wire				rf_overrun;
 wire	[5-1:0]	rf_count;
-wire				rf_error_bit; 
+wire				rf_error_bit;  
 wire 				break_error = (counter_b == 0);
 uart_rfifo #(11) fifo_rx(
 	.clk(		clk		), 
@@ -140,22 +140,22 @@ begin
 			rf_push 			  <= #1 1'b0;
 			rf_data_in 	  <= #1 0;
 			rcounter16 	  <= #1 4'b1110;
-			if (srx_pad_i==1'b0 & ~break_error)   
+			if (srx_pad_i==1'b0 & ~break_error)    
 			begin
 				rstate 		  <= #1 sr_rec_start;
 			end
 		end
 	sr_rec_start :	begin
   			rf_push 			  <= #1 1'b0;
-				if (rcounter16_eq_7)    
-					if (srx_pad_i==1'b1)   
+				if (rcounter16_eq_7)     
+					if (srx_pad_i==1'b1)    
 						rstate <= #1 sr_idle;
-					else            
+					else             
 						rstate <= #1 sr_rec_prepare;
 				rcounter16 <= #1 rcounter16_minus_1;
 			end
 	sr_rec_prepare:begin
-				case (lcr[1:0])  
+				case (lcr[ 1:0])   
 				2'b00 : rbit_counter <= #1 3'b100;
 				2'b01 : rbit_counter <= #1 3'b101;
 				2'b10 : rbit_counter <= #1 3'b110;
@@ -174,8 +174,8 @@ begin
 	sr_rec_bit :	begin
 				if (rcounter16_eq_0)
 					rstate <= #1 sr_end_bit;
-				if (rcounter16_eq_7) 
-					case (lcr[1:0])  
+				if (rcounter16_eq_7)  
+					case (lcr[ 1:0])   
 					2'b00 : rshift[4:0]  <= #1 {srx_pad_i, rshift[4:1]};
 					2'b01 : rshift[5:0]  <= #1 {srx_pad_i, rshift[5:1]};
 					2'b10 : rshift[6:0]  <= #1 {srx_pad_i, rshift[6:1]};
@@ -184,15 +184,15 @@ begin
 				rcounter16 <= #1 rcounter16_minus_1;
 			end
 	sr_end_bit :   begin
-				if (rbit_counter==3'b0) 
-					if (lcr[3]) 
+				if (rbit_counter==3'b0)  
+					if (lcr[3])  
 						rstate <= #1 sr_rec_parity;
 					else
 					begin
 						rstate <= #1 sr_rec_stop;
-						rparity_error <= #1 1'b0;  
+						rparity_error <= #1 1'b0;   
 					end
-				else		
+				else		 
 				begin
 					rstate <= #1 sr_rec_bit;
 					rbit_counter <= #1 rbit_counter - 1'b1;
@@ -200,24 +200,24 @@ begin
 				rcounter16 <= #1 4'b1110;
 			end
 	sr_rec_parity: begin
-				if (rcounter16_eq_7)	
+				if (rcounter16_eq_7)	 
 				begin
 					rparity <= #1 srx_pad_i;
 					rstate <= #1 sr_ca_lc_parity;
 				end
 				rcounter16 <= #1 rcounter16_minus_1;
 			end
-	sr_ca_lc_parity : begin    
+	sr_ca_lc_parity : begin     
 				rcounter16  <= #1 rcounter16_minus_1;
-				rparity_xor <= #1 ^{rshift,rparity}; 
+				rparity_xor <= #1 ^{rshift,rparity};  
 				rstate      <= #1 sr_check_parity;
 			  end
-	sr_check_parity: begin	  
+	sr_check_parity: begin	   
 				case ({lcr[4],lcr[5]})
-					2'b00: rparity_error <= #1  rparity_xor == 0;  
-					2'b01: rparity_error <= #1 ~rparity;      
-					2'b10: rparity_error <= #1  rparity_xor == 1;   
-					2'b11: rparity_error <= #1  rparity;	  
+					2'b00: rparity_error <= #1  rparity_xor == 0;   
+					2'b01: rparity_error <= #1 ~rparity;       
+					2'b10: rparity_error <= #1  rparity_xor == 1;    
+					2'b11: rparity_error <= #1  rparity;	   
 				endcase
 				rcounter16 <= #1 rcounter16_minus_1;
 				rstate <= #1 sr_wait1;
@@ -230,9 +230,9 @@ begin
 			else
 				rcounter16 <= #1 rcounter16_minus_1;
 	sr_rec_stop :	begin
-				if (rcounter16_eq_7)	
+				if (rcounter16_eq_7)	 
 				begin
-					rframing_error <= #1 !srx_pad_i; 
+					rframing_error <= #1 !srx_pad_i;  
 					rstate <= #1 sr_push;
 				end
 				rcounter16 <= #1 rcounter16_minus_1;
@@ -241,13 +241,13 @@ begin
         if(srx_pad_i | break_error)
           begin
             if(break_error)
-        		  rf_data_in 	<= #1 {8'b0, 3'b100}; 
+        		  rf_data_in 	<= #1 {8'b0, 3'b100};  
             else
         			rf_data_in  <= #1 {rshift, 1'b0, rparity_error, rframing_error};
       		  rf_push 		  <= #1 1'b1;
     				rstate        <= #1 sr_idle;
           end
-        else if(~rframing_error)  
+        else if(~rframing_error)   
           begin
        			rf_data_in  <= #1 {rshift, 1'b0, rparity_error, rframing_error};
       		  rf_push 		  <= #1 1'b1;
@@ -257,8 +257,8 @@ begin
 			end
 	default : rstate <= #1 sr_idle;
 	endcase
-  end  
-end 
+  end   
+end  
 always @ (posedge clk or posedge wb_rst_i)
 begin
   if(wb_rst_i)
@@ -267,41 +267,41 @@ begin
     rf_push_q <= #1 rf_push;
 end
 assign rf_push_pulse = rf_push & ~rf_push_q;
-reg 	[9:0]	toc_value; 
+reg 	[9:0]	toc_value;  
 always @(lcr)
 	case (lcr[3:0])
-		4'b0000										: toc_value = 447; 
-		4'b0100										: toc_value = 479; 
-		4'b0001,	4'b1000							: toc_value = 511; 
-		4'b1100										: toc_value = 543; 
-		4'b0010, 4'b0101, 4'b1001				: toc_value = 575; 
-		4'b0011, 4'b0110, 4'b1010, 4'b1101	: toc_value = 639; 
-		4'b0111, 4'b1011, 4'b1110				: toc_value = 703; 
-		4'b1111										: toc_value = 767; 
-	endcase 
-wire [7:0] 	brc_value; 
-assign 		brc_value = toc_value[9:2]; 
+		4'b0000										: toc_value = 447;  
+		4'b0100										: toc_value = 479;  
+		4'b0001,	4'b1000							: toc_value = 511;  
+		4'b1100										: toc_value = 543;  
+		4'b0010, 4'b0101, 4'b1001				: toc_value = 575;  
+		4'b0011, 4'b0110, 4'b1010, 4'b1101	: toc_value = 639;  
+		4'b0111, 4'b1011, 4'b1110				: toc_value = 703;  
+		4'b1111										: toc_value = 767;  
+	endcase  
+wire [7:0] 	brc_value;  
+assign 		brc_value = toc_value[9:2];  
 always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
 		counter_b <= #1 8'd159;
 	else
 	if (srx_pad_i)
-		counter_b <= #1 brc_value; 
+		counter_b <= #1 brc_value;  
 	else
-	if(enable & counter_b != 8'b0)            
-		counter_b <= #1 counter_b - 1;  
-end 
-reg	[9:0]	counter_t;	
+	if(enable & counter_b != 8'b0)             
+		counter_b <= #1 counter_b - 1;   
+end  
+reg	[9:0]	counter_t;	 
 always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
-		counter_t <= #1 10'd639; 
+		counter_t <= #1 10'd639;  
 	else
-		if(rf_push_pulse || rf_pop || rf_count == 0) 
+		if(rf_push_pulse || rf_pop || rf_count == 0)  
 			counter_t <= #1 toc_value;
 		else
-		if (enable && counter_t != 10'b0)  
+		if (enable && counter_t != 10'b0)   
 			counter_t <= #1 counter_t - 1;		
 end
 endmodule
@@ -327,7 +327,7 @@ output 									dtr_pad_o;
 output 									int_o;
 wire [3:0] 								modem_inputs;
 reg 										enable;
-wire 										stx_pad_o;		
+wire 										stx_pad_o;		 
 wire 										srx_pad_i;
 wire 										srx_pad;
 reg [7:0] 								wb_dat_o;
@@ -335,30 +335,30 @@ wire [3-1:0] 		wb_addr_i;
 wire [7:0] 								wb_dat_i;
 reg [3:0] 								ier;
 reg [3:0] 								iir;
-reg [1:0] 								fcr;  
+reg [1:0] 								fcr;   
 reg [4:0] 								mcr;
 reg [7:0] 								lcr;
 reg [7:0] 								msr;
-reg [15:0] 								dl;  
-reg [7:0] 								scratch; 
-reg 										start_dlc; 
-reg 										lsr_mask_d; 
-reg 										msi_reset; 
-reg [15:0] 								dlc;  
+reg [15:0] 								dl;   
+reg [7:0] 								scratch;  
+reg 										start_dlc;  
+reg 										lsr_mask_d;  
+reg 										msi_reset;  
+reg [15:0] 								dlc;   
 reg 										int_o;
-reg [3:0] 								trigger_level; 
+reg [3:0] 								trigger_level;  
 reg 										rx_reset;
 reg 										tx_reset;
-wire 										dlab;			   
-wire 										cts_pad_i, dsr_pad_i, ri_pad_i, dcd_pad_i; 
-wire 										loopback;		   
-wire 										cts, dsr, ri, dcd;	   
-wire                    cts_c, dsr_c, ri_c, dcd_c; 
-wire 										rts_pad_o, dtr_pad_o;		   
+wire 										dlab;			    
+wire 										cts_pad_i, dsr_pad_i, ri_pad_i, dcd_pad_i;  
+wire 										loopback;		    
+wire 										cts, dsr, ri, dcd;	    
+wire                    cts_c, dsr_c, ri_c, dcd_c;  
+wire 										rts_pad_o, dtr_pad_o;		    
 wire [7:0] 								lsr;
 wire 										lsr0, lsr1, lsr2, lsr3, lsr4, lsr5, lsr6, lsr7;
 reg										lsr0r, lsr1r, lsr2r, lsr3r, lsr4r, lsr5r, lsr6r, lsr7r;
-wire 										lsr_mask; 
+wire 										lsr_mask;  
 assign 									lsr[7:0] = { lsr7r, lsr6r, lsr5r, lsr4r, lsr3r, lsr2r, lsr1r, lsr0r };
 assign 									{cts_pad_i, dsr_pad_i, ri_pad_i, dcd_pad_i} = modem_inputs;
 assign 									{cts, dsr, ri, dcd} = ~{cts_pad_i,dsr_pad_i,ri_pad_i,dcd_pad_i};
@@ -368,23 +368,23 @@ assign 									dlab = lcr[7];
 assign 									loopback = mcr[4];
 assign 									rts_pad_o = mcr[1];
 assign 									dtr_pad_o = mcr[0];
-wire 										rls_int;  
-wire 										rda_int;  
-wire 										ti_int;   
-wire										thre_int; 
-wire 										ms_int;   
+wire 										rls_int;   
+wire 										rda_int;   
+wire 										ti_int;    
+wire										thre_int;  
+wire 										ms_int;    
 reg 										tf_push;
 reg 										rf_pop;
 wire [11-1:0] 	rf_data_out;
-wire 										rf_error_bit; 
+wire 										rf_error_bit;  
 wire [5-1:0] 	rf_count;
 wire [5-1:0] 	tf_count;
 wire [2:0] 								tstate;
 wire [3:0] 								rstate;
 wire [9:0] 								counter_t;
-wire                      thre_set_en; 
-reg  [7:0]                block_cnt;   
-reg  [7:0]                block_value; 
+wire                      thre_set_en;  
+reg  [7:0]                block_cnt;    
+reg  [7:0]                block_value;  
 wire serial_out;
 uart_transmitter transmitter(clk, wb_rst_i, lcr, tf_push, wb_dat_i, enable, serial_out, tstate, tf_count, tx_reset, lsr_mask);
   uart_sync_flops    i_uart_sync_flops
@@ -403,7 +403,7 @@ assign stx_pad_o = loopback ? 1'b1 : serial_out;
 uart_receiver receiver(clk, wb_rst_i, lcr, rf_pop, serial_in, enable, 
 	counter_t, rf_count, rf_data_out, rf_error_bit, rf_overrun, rx_reset, lsr_mask, rstate, rf_push_pulse);
 always @(dl or dlab or ier or iir or scratch
-			or lcr or lsr or msr or rf_data_out or wb_addr_i or wb_re_i)   
+			or lcr or lsr or msr or rf_data_out or wb_addr_i or wb_re_i)    
 begin
 	case (wb_addr_i)
 		3'd0   : wb_dat_o = dlab ? dl[7:0] : rf_data_out[10:3];
@@ -413,19 +413,19 @@ begin
 		3'd5	: wb_dat_o = lsr;
 		3'd6	: wb_dat_o = msr;
 		3'd7	: wb_dat_o = scratch;
-		default:  wb_dat_o = 8'b0; 
-	endcase 
-end 
+		default:  wb_dat_o = 8'b0;  
+	endcase  
+end  
 always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
 		rf_pop <= #1 0; 
 	else
-	if (rf_pop)	
+	if (rf_pop)	 
 		rf_pop <= #1 0;
 	else
 	if (wb_re_i && wb_addr_i == 3'd0 && !dlab)
-		rf_pop <= #1 1; 
+		rf_pop <= #1 1;  
 end
 wire 	lsr_mask_condition;
 wire 	iir_read;
@@ -441,7 +441,7 @@ always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
 		lsr_mask_d <= #1 0;
-	else 
+	else  
 		lsr_mask_d <= #1 lsr_mask_condition;
 end
 assign lsr_mask = lsr_mask_condition && ~lsr_mask_d;
@@ -454,18 +454,18 @@ begin
 		msi_reset <= #1 0;
 	else
 	if (msr_read)
-		msi_reset <= #1 1; 
+		msi_reset <= #1 1;  
 end
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i)
-		lcr <= #1 8'b00000011; 
+		lcr <= #1 8'b00000011;  
 	else
 	if (wb_we_i && wb_addr_i==3'd3)
 		lcr <= #1 wb_dat_i;
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i)
 	begin
-		ier <= #1 4'b0000; 
+		ier <= #1 4'b0000;  
 		dl[15:8] <= #1 8'b0;
 	end
 	else
@@ -475,7 +475,7 @@ always @(posedge clk or posedge wb_rst_i)
 			dl[15:8] <= #1 wb_dat_i;
 		end
 		else
-			ier <= #1 wb_dat_i[3:0]; 
+			ier <= #1 wb_dat_i[3:0];  
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) begin
 		fcr <= #1 2'b11; 
@@ -498,7 +498,7 @@ always @(posedge clk or posedge wb_rst_i)
 			mcr <= #1 wb_dat_i[4:0];
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i)
-		scratch <= #1 0; 
+		scratch <= #1 0;  
 	else
 	if (wb_we_i && wb_addr_i==3'd7)
 		scratch <= #1 wb_dat_i;
@@ -514,26 +514,26 @@ always @(posedge clk or posedge wb_rst_i)
 		if (dlab)
 		begin
 			dl[7:0] <= #1 wb_dat_i;
-			start_dlc <= #1 1'b1; 
+			start_dlc <= #1 1'b1;  
 			tf_push <= #1 1'b0;
 		end
 		else
 		begin
 			tf_push   <= #1 1'b1;
 			start_dlc <= #1 1'b0;
-		end 
+		end  
 	else
 	begin
 		start_dlc <= #1 1'b0;
 		tf_push   <= #1 1'b0;
-	end 
+	end  
 always @(fcr)
 	case (fcr[1:0])
 		2'b00 : trigger_level = 1;
 		2'b01 : trigger_level = 4;
 		2'b10 : trigger_level = 8;
 		2'b11 : trigger_level = 14;
-	endcase 
+	endcase  
 reg [3:0] delayed_modem_signals;
 always @(posedge clk or posedge wb_rst_i)
 begin
@@ -549,13 +549,13 @@ begin
 		delayed_modem_signals[3:0] <= #1 {dcd, ri, dsr, cts};
 	end
 end
-assign lsr0 = (rf_count==0 && rf_push_pulse);  
-assign lsr1 = rf_overrun;     
-assign lsr2 = rf_data_out[1]; 
-assign lsr3 = rf_data_out[0]; 
-assign lsr4 = rf_data_out[2]; 
-assign lsr5 = (tf_count==5'b0 && thre_set_en);  
-assign lsr6 = (tf_count==5'b0 && thre_set_en && (tstate ==  0)); 
+assign lsr0 = (rf_count==0 && rf_push_pulse);   
+assign lsr1 = rf_overrun;      
+assign lsr2 = rf_data_out[1];  
+assign lsr3 = rf_data_out[0];  
+assign lsr4 = rf_data_out[2];  
+assign lsr5 = (tf_count==5'b0 && thre_set_en);   
+assign lsr6 = (tf_count==5'b0 && thre_set_en && (tstate ==   0));  
 assign lsr7 = rf_error_bit | rf_overrun;
 reg 	 lsr0_d;
 always @(posedge clk or posedge wb_rst_i)
@@ -563,30 +563,30 @@ always @(posedge clk or posedge wb_rst_i)
 	else lsr0_d <= #1 lsr0;
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr0r <= #1 0;
-	else lsr0r <= #1 (rf_count==1 && rf_pop && !rf_push_pulse || rx_reset) ? 0 : 
-					  lsr0r || (lsr0 && ~lsr0_d); 
-reg lsr1_d; 
+	else lsr0r <= #1 (rf_count==1 && rf_pop && !rf_push_pulse || rx_reset) ? 0 :  
+					  lsr0r || (lsr0 && ~lsr0_d);  
+reg lsr1_d;  
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr1_d <= #1 0;
 	else lsr1_d <= #1 lsr1;
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr1r <= #1 0;
-	else	lsr1r <= #1	lsr_mask ? 0 : lsr1r || (lsr1 && ~lsr1_d); 
-reg lsr2_d; 
+	else	lsr1r <= #1	lsr_mask ? 0 : lsr1r || (lsr1 && ~lsr1_d);  
+reg lsr2_d;  
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr2_d <= #1 0;
 	else lsr2_d <= #1 lsr2;
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr2r <= #1 0;
-	else lsr2r <= #1 lsr_mask ? 0 : lsr2r || (lsr2 && ~lsr2_d); 
-reg lsr3_d; 
+	else lsr2r <= #1 lsr_mask ? 0 : lsr2r || (lsr2 && ~lsr2_d);  
+reg lsr3_d;  
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr3_d <= #1 0;
 	else lsr3_d <= #1 lsr3;
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr3r <= #1 0;
-	else lsr3r <= #1 lsr_mask ? 0 : lsr3r || (lsr3 && ~lsr3_d); 
-reg lsr4_d; 
+	else lsr3r <= #1 lsr_mask ? 0 : lsr3r || (lsr3 && ~lsr3_d);  
+reg lsr4_d;  
 always @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) lsr4_d <= #1 0;
 	else lsr4_d <= #1 lsr4;
@@ -620,42 +620,42 @@ begin
 		dlc <= #1 0;
 	else
 		if (start_dlc | ~ (|dlc))
-  			dlc <= #1 dl - 1;               
+  			dlc <= #1 dl - 1;                
 		else
-			dlc <= #1 dlc - 1;              
+			dlc <= #1 dlc - 1;               
 end
 always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
 		enable <= #1 1'b0;
 	else
-		if (|dl & ~(|dlc))     
+		if (|dl & ~(|dlc))      
 			enable <= #1 1'b1;
 		else
 			enable <= #1 1'b0;
 end
 always @(lcr)
   case (lcr[3:0])
-    4'b0000                             : block_value =  95; 
-    4'b0100                             : block_value = 103; 
-    4'b0001, 4'b1000                    : block_value = 111; 
-    4'b1100                             : block_value = 119; 
-    4'b0010, 4'b0101, 4'b1001           : block_value = 127; 
-    4'b0011, 4'b0110, 4'b1010, 4'b1101  : block_value = 143; 
-    4'b0111, 4'b1011, 4'b1110           : block_value = 159; 
-    4'b1111                             : block_value = 175; 
-  endcase 
+    4'b0000                             : block_value =  95;  
+    4'b0100                             : block_value = 103;  
+    4'b0001, 4'b1000                    : block_value = 111;  
+    4'b1100                             : block_value = 119;  
+    4'b0010, 4'b0101, 4'b1001           : block_value = 127;  
+    4'b0011, 4'b0110, 4'b1010, 4'b1101  : block_value = 143;  
+    4'b0111, 4'b1011, 4'b1110           : block_value = 159;  
+    4'b1111                             : block_value = 175;  
+  endcase  
 always @(posedge clk or posedge wb_rst_i)
 begin
   if (wb_rst_i)
     block_cnt <= #1 8'd0;
   else
-  if(lsr5r & fifo_write)  
+  if(lsr5r & fifo_write)   
     block_cnt <= #1 block_value;
   else
-  if (enable & block_cnt != 8'b0)  
-    block_cnt <= #1 block_cnt - 1;  
-end 
+  if (enable & block_cnt != 8'b0)   
+    block_cnt <= #1 block_cnt - 1;   
+end  
 assign thre_set_en = ~(|block_cnt);
 assign rls_int  = ier[2] && (lsr[1] || lsr[2] || lsr[3] || lsr[4]);
 assign rda_int  = ier[0] && (rf_count >= {1'b0,trigger_level});
@@ -700,15 +700,15 @@ reg 	ti_int_pnd;
 always  @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) rls_int_pnd <= #1 0; 
 	else 
-		rls_int_pnd <= #1 lsr_mask ? 0 :  						
-							rls_int_rise ? 1 :						
-							rls_int_pnd && ier[2];	
+		rls_int_pnd <= #1 lsr_mask ? 0 :  						 
+							rls_int_rise ? 1 :						 
+							rls_int_pnd && ier[2];	 
 always  @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) rda_int_pnd <= #1 0; 
 	else 
-		rda_int_pnd <= #1 ((rf_count == {1'b0,trigger_level}) && fifo_read) ? 0 :  	
-							rda_int_rise ? 1 :						
-							rda_int_pnd && ier[0];	
+		rda_int_pnd <= #1 ((rf_count == {1'b0,trigger_level}) && fifo_read) ? 0 :  	 
+							rda_int_rise ? 1 :						 
+							rda_int_pnd && ier[0];	 
 always  @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) thre_int_pnd <= #1 0; 
 	else 
@@ -738,18 +738,18 @@ begin
 					ti_int_pnd		? ~fifo_read					:
 					thre_int_pnd	? !(fifo_write & iir_read) :
 					ms_int_pnd		? ~msr_read						:
-					0;	
+					0;	 
 end
 always @(posedge clk or posedge wb_rst_i)
 begin
 	if (wb_rst_i)
 		iir <= #1 1;
 	else
-	if (rls_int_pnd)  
+	if (rls_int_pnd)   
 	begin
-		iir[3:1] <= #1 3'b011;	
-		iir[0] <= #1 1'b0;		
-	end else 
+		iir[3:1] <= #1 3'b011;	 
+		iir[0] <= #1 1'b0;		 
+	end else  
 	if (rda_int)
 	begin
 		iir[3:1] <= #1 3'b010;
@@ -769,7 +769,7 @@ begin
 	begin
 		iir[3:1] <= #1 3'b000;
 		iir[0] <= #1 1'b0;
-	end else	
+	end else	 
 	begin
 		iir[3:1] <= #1 0;
 		iir[0] <= #1 1'b1;
@@ -779,8 +779,8 @@ endmodule
 `timescale 1ns/10ps
 module uart_rfifo (clk, 
 	wb_rst_i, data_in, data_out,
-	push, 
-	pop,   
+	push,  
+	pop,    
 	overrun,
 	count,
 	error_bit,
@@ -818,7 +818,7 @@ raminfr #(fifo_pointer_w,8,fifo_depth) rfifo
 			.di(data_in[fifo_width-1:fifo_width-8]), 
 			.dpo(data8_out)
 		); 
-always @(posedge clk or posedge wb_rst_i) 
+always @(posedge clk or posedge wb_rst_i)  
 begin
 	if (wb_rst_i)
 	begin
@@ -867,7 +867,7 @@ begin
   else
 	begin
 		case ({push, pop})
-		2'b10 : if (count<fifo_depth)  
+		2'b10 : if (count<fifo_depth)   
 			begin
 				top       <= #1 top_plus_1;
 				fifo[top] <= #1 data_in[2:0];
@@ -887,8 +887,8 @@ begin
     default: ;
 		endcase
 	end
-end   
-always @(posedge clk or posedge wb_rst_i) 
+end    
+always @(posedge clk or posedge wb_rst_i)  
 begin
   if (wb_rst_i)
     overrun   <= #1 1'b0;
@@ -898,7 +898,7 @@ begin
   else
   if(push & ~pop & (count==fifo_depth))
     overrun   <= #1 1'b1;
-end   
+end    
 assign data_out = {data8_out,fifo[bottom]};
 wire	[2:0]	word0 = fifo[0];
 wire	[2:0]	word1 = fifo[1];
@@ -924,8 +924,8 @@ endmodule
 `timescale 1ns/10ps
 module uart_tfifo (clk, 
 	wb_rst_i, data_in, data_out,
-	push, 
-	pop,   
+	push,  
+	pop,    
 	overrun,
 	count,
 	fifo_reset,
@@ -959,7 +959,7 @@ raminfr #(fifo_pointer_w,fifo_width,fifo_depth) tfifo
 			.di(data_in), 
 			.dpo(data_out)
 		); 
-always @(posedge clk or posedge wb_rst_i) 
+always @(posedge clk or posedge wb_rst_i)  
 begin
 	if (wb_rst_i)
 	begin
@@ -976,7 +976,7 @@ begin
   else
 	begin
 		case ({push, pop})
-		2'b10 : if (count<fifo_depth)  
+		2'b10 : if (count<fifo_depth)   
 			begin
 				top       <= #1 top_plus_1;
 				count     <= #1 count + 1'b1;
@@ -993,8 +993,8 @@ begin
     default: ;
 		endcase
 	end
-end   
-always @(posedge clk or posedge wb_rst_i) 
+end    
+always @(posedge clk or posedge wb_rst_i)  
 begin
   if (wb_rst_i)
     overrun   <= #1 1'b0;
@@ -1004,7 +1004,7 @@ begin
   else
   if(push & (count==fifo_depth))
     overrun   <= #1 1'b1;
-end   
+end    
 endmodule
 `timescale 1ns/10ps
 module uart_sync_flops
@@ -1019,12 +1019,12 @@ module uart_sync_flops
 parameter Tp            = 1;
 parameter width         = 1;
 parameter init_value    = 1'b0;
-input                           rst_i;                  
-input                           clk_i;                  
-input                           stage1_rst_i;           
-input                           stage1_clk_en_i;        
-input   [width-1:0]             async_dat_i;            
-output  [width-1:0]             sync_dat_o;             
+input                           rst_i;                   
+input                           clk_i;                   
+input                           stage1_rst_i;            
+input                           stage1_clk_en_i;         
+input   [width-1:0]             async_dat_i;             
+output  [width-1:0]             sync_dat_o;              
 reg     [width-1:0]             sync_dat_o;
 reg     [width-1:0]             flop_0;
 always @ (posedge clk_i or posedge rst_i)
@@ -1048,7 +1048,7 @@ endmodule
 module uart_wb (clk, wb_rst_i, 
 	wb_we_i, wb_stb_i, wb_cyc_i, wb_ack_o, wb_adr_i,
 	wb_adr_int, wb_dat_i, wb_dat_o, wb_dat8_i, wb_dat8_o, wb_dat32_o, wb_sel_i,
-	we_o, re_o 
+	we_o, re_o  
 );
 input 		  clk;
 input 		  wb_rst_i;
@@ -1056,16 +1056,16 @@ input 		  wb_we_i;
 input 		  wb_stb_i;
 input 		  wb_cyc_i;
 input [3:0]   wb_sel_i;
-input [3-1:0] 	wb_adr_i; 
-input [7:0]  wb_dat_i; 
+input [3-1:0] 	wb_adr_i;  
+input [7:0]  wb_dat_i;  
 output [7:0] wb_dat_o;
 reg [7:0] 	 wb_dat_o;
 wire [7:0] 	 wb_dat_i;
 reg [7:0] 	 wb_dat_is;
-output [3-1:0]	wb_adr_int; 
-input [7:0]   wb_dat8_o; 
+output [3-1:0]	wb_adr_int;  
+input [7:0]   wb_dat8_o;  
 output [7:0]  wb_dat8_i;
-input [31:0]  wb_dat32_o; 
+input [31:0]  wb_dat32_o;  
 output 		  wb_ack_o;
 output 		  we_o;
 output 		  re_o;
@@ -1073,14 +1073,14 @@ wire 			  we_o;
 reg 			  wb_ack_o;
 reg [7:0] 	  wb_dat8_i;
 wire [7:0] 	  wb_dat8_o;
-wire [3-1:0]	wb_adr_int; 
+wire [3-1:0]	wb_adr_int;  
 reg [3-1:0]	wb_adr_is;
 reg 								wb_we_is;
 reg 								wb_cyc_is;
 reg 								wb_stb_is;
 reg [3:0] 						wb_sel_is;
 wire [3:0]   wb_sel_i;
-reg 			 wre ;
+reg 			 wre ; 
 reg [1:0] 	 wbstate;
 always  @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) begin
@@ -1110,8 +1110,8 @@ always  @(posedge clk or posedge wb_rst_i)
 				wre <= #1 0;
 			end
 		endcase
-assign we_o =  wb_we_is & wb_stb_is & wb_cyc_is & wre ; 
-assign re_o = ~wb_we_is & wb_stb_is & wb_cyc_is & wre ; 
+assign we_o =  wb_we_is & wb_stb_is & wb_cyc_is & wre ;  
+assign re_o = ~wb_we_is & wb_stb_is & wb_cyc_is & wre ;  
 always  @(posedge clk or posedge wb_rst_i)
 	if (wb_rst_i) begin
 		wb_adr_is <= #1 0;
@@ -1146,16 +1146,16 @@ input 										tf_push;
 input [7:0] 								wb_dat_i;
 input 										enable;
 input 										tx_reset;
-input 										lsr_mask; 
+input 										lsr_mask;  
 output 										stx_pad_o;
 output [2:0] 								tstate;
 output [5-1:0] 	tf_count;
 reg [2:0] 									tstate;
 reg [4:0] 									counter;
-reg [2:0] 									bit_counter;   
-reg [6:0] 									shift_out;	
+reg [2:0] 									bit_counter;    
+reg [6:0] 									shift_out;	 
 reg 											stx_o_tmp;
-reg 											parity_xor;  
+reg 											parity_xor;   
 reg 											tf_pop;
 reg 											bit_out;
 wire [8-1:0] 			tf_data_in;
@@ -1164,7 +1164,7 @@ wire 											tf_push;
 wire 											tf_overrun;
 wire [5-1:0] 		tf_count;
 assign 										tf_data_in = wb_dat_i;
-uart_tfifo fifo_tx(	
+uart_tfifo fifo_tx(	 
 	.clk(		clk		), 
 	.wb_rst_i(	wb_rst_i	),
 	.data_in(	tf_data_in	),
@@ -1199,7 +1199,7 @@ begin
   if (enable)
   begin
 	case (tstate)
-	s_idle	 :	if (~|tf_count) 
+	s_idle	 :	if (~|tf_count)  
 			begin
 				tstate <= #1 s_idle;
 				stx_o_tmp <= #1 1'b1;
@@ -1212,7 +1212,7 @@ begin
 			end
 	s_pop_byte :	begin
 				tf_pop <= #1 1'b1;
-				case (lcr[1:0])  
+				case (lcr[ 1:0])   
 				2'b00 : begin
 					bit_counter <= #1 3'b100;
 					parity_xor  <= #1 ^tf_data_out[4:0];
@@ -1259,7 +1259,7 @@ begin
 						{shift_out[5:0],bit_out  } <= #1 {shift_out[6:1], shift_out[0]};
 						tstate <= #1 s_send_byte;
 					end
-					else   
+					else    
 					if (~lcr[3])
 					begin
 						tstate <= #1 s_send_stop;
@@ -1278,7 +1278,7 @@ begin
 				end
 				else
 					counter <= #1 counter - 1'b1;
-				stx_o_tmp <= #1 bit_out; 
+				stx_o_tmp <= #1 bit_out;  
 			end
 	s_send_parity :	begin
 				if (~|counter)
@@ -1297,9 +1297,9 @@ begin
 				if (~|counter)
 				  begin
 						casex ({lcr[2],lcr[1:0]})
-  						3'b0xx:	  counter <= #1 5'b01101;     
-  						3'b100:	  counter <= #1 5'b10101;     
-  						default:	  counter <= #1 5'b11101;     
+  						3'b0xx:	  counter <= #1 5'b01101;      
+  						3'b100:	  counter <= #1 5'b10101;      
+  						default:	  counter <= #1 5'b11101;      
 						endcase
 					end
 				else
@@ -1312,20 +1312,20 @@ begin
 					counter <= #1 counter - 1'b1;
 				stx_o_tmp <= #1 1'b1;
 			end
-		default : 
+		default :  
 			tstate <= #1 s_idle;
 	endcase
-  end 
+  end  
   else
-    tf_pop <= #1 1'b0;  
-end 
-assign stx_pad_o = lcr[6] ? 1'b0 : stx_o_tmp;    
+    tf_pop <= #1 1'b0;   
+end  
+assign stx_pad_o = lcr[6] ? 1'b0 : stx_o_tmp;     
 endmodule
 `timescale 1ns/10ps
 module uart_top	(
 	wb_clk_i, 
 	wb_rst_i, wb_adr_i, wb_dat_i, wb_dat_o, wb_we_i, wb_stb_i, wb_cyc_i, wb_ack_o, wb_sel_i,
-	int_o, 
+	int_o,  
 	stx_pad_o, srx_pad_i,
 	rts_pad_o, cts_pad_i, dtr_pad_o, dsr_pad_i, ri_pad_i, dcd_pad_i
 	);
@@ -1356,13 +1356,13 @@ wire 									 dtr_pad_o;
 wire [uart_addr_width-1:0] 	 wb_adr_i;
 wire [uart_data_width-1:0] 	 wb_dat_i;
 wire [uart_data_width-1:0] 	 wb_dat_o;
-wire [7:0] 							 wb_dat8_i; 
-wire [7:0] 							 wb_dat8_o; 
-wire [31:0] 						 wb_dat32_o; 
-wire [3:0] 							 wb_sel_i;  
+wire [7:0] 							 wb_dat8_i;  
+wire [7:0] 							 wb_dat8_o;  
+wire [31:0] 						 wb_dat32_o;  
+wire [3:0] 							 wb_sel_i;   
 wire [uart_addr_width-1:0] 	 wb_adr_int;
-wire 									 we_o;	
-wire		          	     re_o;	
+wire 									 we_o;	 
+wire		          	     re_o;	 
 uart_wb		wb_interface(
 		.clk(		wb_clk_i		),
 		.wb_rst_i(	wb_rst_i	),
@@ -1450,13 +1450,12 @@ begin
 end
 endfunction
 
-wire [31:0] uart0_dat_o;
-
 `ifdef UART0
 wire uart0_cs;
 assign uart0_cs = wbs_adr_i[uart0_mem_map_hi:uart0_mem_map_lo] == uart0_base_adr[uart0_mem_map_hi:uart0_mem_map_lo];
 wire [7:0] uart0_temp;
 wire uart0_ack_o;
+/*
 uart_top uart0	(
     .wb_clk_i(wbs_clk), .wb_rst_i(wbs_rst), 	
     // Wishbone signals
@@ -1467,6 +1466,22 @@ uart_top uart0	(
     .stx_pad_o(uart0_tx_pad_o), .srx_pad_i(uart0_rx_pad_i),
     // modem signals
     .rts_pad_o(), .cts_pad_i(1'b0), .dtr_pad_o(), .dsr_pad_i(1'b0), .ri_pad_i(1'b0), .dcd_pad_i(1'b0) );
+*/
+uart16750_wb uart0(
+    // UART signals
+    .rx(uart0_rx_pad_i),
+    .tx(uart0_tx_pad_o),
+    .int(uart0_irq),
+    // wishbone slave
+    .wbs_dat_i(tobyte(wbs_sel_i,wbs_dat_i)),
+    .wbs_adr_i(wbs_adr_i[2:0]),
+    .wbs_we_i(wbs_we_i),
+    .wbs_cyc_i(wbs_cyc_i & uart0_cs),
+    .wbs_stb_i(wbs_stb_i),
+    .wbs_dat_o(uart0_temp),
+    .wbs_ack_o(uart0_ack_o),
+    .wb_clk_i(wbs_clk),
+    .wb_rst_i(wbs_rst) );
 assign uart0_dat_o = mask( toword(uart0_temp), uart0_ack_o);
 `else
 assign uart0_dat_o = 32'h0;
