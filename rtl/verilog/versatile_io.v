@@ -1471,7 +1471,7 @@ uart16750_wb uart0(
     // UART signals
     .rx(uart0_rx_pad_i),
     .tx(uart0_tx_pad_o),
-    .int(uart0_irq),
+    .irq(uart0_irq),
     // wishbone slave
     .wbs_dat_i(tobyte(wbs_sel_i,wbs_dat_i)),
     .wbs_adr_i(wbs_adr_i[2:0]),
